@@ -8,13 +8,19 @@ module.exports = [
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'commonjs',
-      globals: {
-        ...globals.node,
-        ...globals.jest,
-      },
+      globals: { ...globals.node, ...globals.jest },
     },
     rules: {
       'no-unused-vars': ['warn', { args: 'none' }],
+    },
+  },
+  // Front-end scripts that run in the browser:
+  {
+    files: ['formValidation.js', 'feedback.js', 'prettify.js', 'sorter.js'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'script',
+      globals: { ...globals.browser },
     },
   },
 ];

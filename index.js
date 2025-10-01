@@ -4,7 +4,11 @@ const session = require('express-session');
 const sqlite3 = require('sqlite3').verbose();
 
 let bcrypt = null;
-try { bcrypt = require('bcrypt'); } catch (e) { }
+try {
+    bcrypt = require('bcrypt');
+} catch (err) {
+    console.warn('bcrypt not available; falling back to plain compare for dev/tests only');
+}
 
 const app = express();
 app.use(express.json());
