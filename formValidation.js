@@ -1,4 +1,3 @@
-// Form validation for feedback.html
 document.addEventListener("DOMContentLoaded", function () {
     const queryForm = document.getElementById('queryForm');
     const error = document.getElementById('error');
@@ -10,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const phone = document.getElementById('phone').value.trim();
             const query = document.getElementById('query').value.trim();
 
-            error.innerHTML = ''; // Reset error display
+            error.innerHTML = '';
             let messages = [];
 
             if (name === '') messages.push('Name is required.');
@@ -25,7 +24,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Greeting Message for most pages
     const section = document.querySelector('section');
     if (section) {
         const hour = new Date().getHours();
@@ -40,7 +38,6 @@ document.addEventListener("DOMContentLoaded", function () {
         section.insertBefore(greetElem, section.firstChild);
     }
 
-    // Footer Last Updated Date
     const footerDate = document.getElementById("lastUpdated");
     if (footerDate) {
         footerDate.textContent = "Last updated: " + new Date().toLocaleDateString();
