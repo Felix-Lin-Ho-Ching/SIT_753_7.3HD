@@ -1,11 +1,20 @@
+
 module.exports = {
     testEnvironment: 'node',
-    testMatch: ['**/__tests__/**/*.test.js'],
+
+    collectCoverage: true,
+    coverageDirectory: 'coverage',
+    coverageReporters: ['text-summary', 'lcov'],
+
+
     reporters: [
         'default',
         ['jest-junit', { outputDirectory: 'reports', outputName: 'junit.xml' }]
     ],
-    coverageDirectory: 'coverage',
-    collectCoverage: true,
-    coverageReporters: ['lcov', 'text-summary']
+
+
+    moduleNameMapper: {
+        '^sqlite3$': '<rootDir>/__mocks__/sqlite3.js',
+        '^express-prom-bundle$': '<rootDir>/__mocks__/express-prom-bundle.js'
+    }
 };
