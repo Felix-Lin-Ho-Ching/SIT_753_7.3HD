@@ -1,26 +1,25 @@
 {
-  "name": "sit774-5.3d",
+  "name": "sit753-7.3hd",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "license": "ISC",
+  "private": true,
   "scripts": {
     "start": "node index.js",
     "test": "cross-env NODE_ENV=test jest --ci --runInBand --coverage",
     "lint": "eslint ."
   },
   "dependencies": {
-    "bcrypt": "^6.0.0",
-    "express": "^5.1.0",
-    "express-session": "^1.18.1",
-    "express-prom-bundle": "^7.0.0",
-    "sqlite3": "^5.1.7"
+    "bcrypt": "5.1.1",
+    "express": "4.21.2",
+    "express-session": "1.18.1",
+    "express-prom-bundle": "6.3.6"
   },
   "devDependencies": {
-    "cross-env": "^7.0.3",
-    "eslint": "^9.7.0",
-    "jest": "^29.7.0",
-    "jest-junit": "^16.0.0",
-    "supertest": "^7.0.0"
+    "cross-env": "7.0.3",
+    "eslint": "9.8.0",
+    "@eslint/js": "9.8.0",
+    "globals": "15.8.0",
+    "jest": "29.7.0",
+    "jest-junit": "16.0.0",
+    "supertest": "7.0.0"
   }
 }
