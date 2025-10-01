@@ -5,13 +5,6 @@ module.exports = {
     coverageReporters: ['text-summary', 'lcov'],
     reporters: [
         'default',
-        [
-            'jest-junit',
-            {
-                outputDirectory: 'reports',
-                outputName: 'junit.xml',
-                addFileAttribute: 'true'
-            }
-        ]
+        ['jest-junit', { outputDirectory: 'reports', outputName: 'junit.xml', addFileAttribute: 'true' }]
     ]
 };
