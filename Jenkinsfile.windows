@@ -1,0 +1,17 @@
+pipeline {
+  agent any
+  environment { NODE_ENV = "ci"; IMAGE_TAG = "${env.GIT_COMMIT.take(7)}" }
+  tools { nodejs "NodeJS20" }
+  stages {
+    stage('Checkout'){ steps { checkout scm } }
+    stage('Build'){ steps { powershell 'node -v; npm ci' } }
+    stage('Test'){ steps { powershell 'npm test' } }
+    stage('Code Quality'){ steps { powershell 'npm run lint || exit 0' } }
+    stage('Security'){ steps { powershell 'npm audit --production --audit-level=high; if ($LASTEXITCODE -ne 0){ throw "Security issues" }' } }
+    stage('Build Image'){ steps { powershell 'docker build -t sit753-7_3hd:${env:IMAGE_TAG} .; docker tag sit753-7_3hd:${env:IMAGE_TAG} sit753-7_3hd:latest' } }
+    stage('Deploy to Staging'){ steps { powershell 'docker compose down 2>$null; docker compose up -d --build' } }
+    stage('Release'){ when { branch 'main' } steps { powershell 'git config user.email "ci@example.com" ; git config user.name "ci-bot" ; git tag -a "v$env:BUILD_NUMBER" -m "CI build $env:BUILD_NUMBER" ; git push origin --tags 2>$null' } }
+    stage('Monitoring & Health'){ steps { powershell '$ok=$false; 1..5|%{ Start-Sleep 5; try{ curl.exe http://localhost:3000/healthz | Out-Null; if ($LASTEXITCODE -eq 0){$ok=$true;break} }catch{} }; if(-not $ok){ throw "Health check failed" }' } }
+  }
+  post { always { cleanWs() } }
+}

@@ -1,0 +1,11 @@
+groups:
+- name: app_alerts
+  rules:
+  - alert: AppDown
+    expr: up{job="app"} == 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "App is down"
+      description: "No scrape targets are up for job=app"

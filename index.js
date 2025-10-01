@@ -7,7 +7,12 @@ const fs = require('fs');
 const bcrypt = require('bcrypt');
 const SALT_ROUNDS = 10;
 
-const app = express();
+\1
+
+const promBundle = require('express-prom-bundle');
+const metricsMiddleware = promBundle({ includeMethod: true, includePath: true, includeStatusCode: true });
+app.use(metricsMiddleware);
+
 const PORT = 3000;
 
 app.use(bodyParser.urlencoded({ extended: false }));
