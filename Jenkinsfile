@@ -2,9 +2,7 @@ pipeline {
   agent any
   options { timestamps(); skipDefaultCheckout(false) }
 
-  environment {
-    CI = 'true'
-  }
+  environment { CI = 'true' }
 
   stages {
     stage('Checkout') {
@@ -29,7 +27,7 @@ pipeline {
           npx jest --runInBand --coverage --coverageReporters=lcov --coverageReporters=text-summary --reporters=default --reporters=jest-junit
         '''
         junit 'junit.xml'
-        archiveArtifacts artifacts: 'coverage/**, junit.xml', fingerprint: true, allowEmptyArchive: true
+        archiveArtifacts artifacts: 'coverage/**, junit.xml', fingerprint: true, allowEmptyArchive: false
       }
     }
 
