@@ -1,5 +1,3 @@
-
-module.exports = function mockPromBundle() {
-
-    return (_req, _res, next) => next();
+module.exports = function () {
+    return function (req, res, next) { next(); };
 };

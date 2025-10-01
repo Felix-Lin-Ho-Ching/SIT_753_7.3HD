@@ -1,12 +1,16 @@
+class Statement {
+    run(params, cb) { if (typeof params === "function") { cb = params; } if (cb) cb(null); return this; }
+    get(params, cb) { if (typeof params === "function") { cb = params; } if (cb) cb(null, null); }
+    all(params, cb) { if (typeof params === "function") { cb = params; } if (cb) cb(null, []); }
+    finalize(cb) { if (cb) cb(null); }
+}
 class Database {
     constructor() { }
-    serialize(fn) { if (typeof fn === 'function') fn(); return this; }
-    run() { return this; }
-    get(_sql, _params, cb) { if (typeof _params === 'function') cb = _params; if (cb) cb(null, null); }
-    all(_sql, _params, cb) { if (typeof _params === 'function') cb = _params; if (cb) cb(null, []); }
+    serialize(cb) { if (cb) cb(); }
+    run(sql, params, cb) { if (typeof params === "function") { cb = params; } if (cb) cb(null); return new Statement(); }
+    get(sql, params, cb) { if (typeof params === "function") { cb = params; } if (cb) cb(null, null); }
+    all(sql, params, cb) { if (typeof params === "function") { cb = params; } if (cb) cb(null, []); }
+    prepare(sql) { return new Statement(); }
     close(cb) { if (cb) cb(null); }
 }
-module.exports = {
-    verbose() { return module.exports; },
-    Database
-};
+module.exports = { Database, verbose: () => module.exports };

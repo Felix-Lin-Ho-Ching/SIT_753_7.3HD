@@ -1,28 +1,26 @@
-﻿export default [
+﻿const js = require("@eslint/js");
+const globals = require("globals");
+
+module.exports = [
+  { ignores: ["coverage/**", "reports/**", "node_modules/**"] },
   {
-    files: ['**/*.js'],
+    files: ["**/*.js"],
     languageOptions: {
       ecmaVersion: 2021,
-      sourceType: 'script'
+      sourceType: "commonjs",
+      globals: { ...globals.node, ...globals.jest }
+    },
+    rules: {
+      "no-unused-vars": ["warn", { args: "none", ignoreRestSiblings: true }],
+      "no-empty": "off"
     }
   },
   {
-    files: ['formValidation.js', 'public/**/*.js'],
+    files: ["formValidation.js", "public/**/*.js"],
     languageOptions: {
-      globals: {
-        window: 'readonly',
-        document: 'readonly'
-      }
-    }
-  },
-  {
-    files: ['index.js', '__tests__/**/*.js'],
-    languageOptions: {
-      globals: {
-        require: 'readonly',
-        module: 'readonly',
-        process: 'readonly'
-      }
+      ecmaVersion: 2021,
+      sourceType: "script",
+      globals: { ...globals.browser }
     }
   }
 ];
