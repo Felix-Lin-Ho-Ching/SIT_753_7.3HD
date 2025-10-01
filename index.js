@@ -176,6 +176,17 @@ app.post('/feedback', (req, res) => {
 
 
 
-app.listen(PORT, () => {
+ => {
     console.log(`Server running at http://localhost:${PORT}`);
 });
+
+// Added by CI merge: health endpoint
+app.get('/healthz', (req, res) => res.status(200).send('ok'));
+
+
+// Added by CI merge: export for tests and normal run
+module.exports = app;
+if (require.main === module) {
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => console.log(`Server running on :${port}`));
+}
