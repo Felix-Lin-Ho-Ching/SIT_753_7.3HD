@@ -10,17 +10,10 @@ module.exports = [
       sourceType: "commonjs",
       globals: { ...globals.node, ...globals.jest }
     },
-    rules: {
-      "no-unused-vars": ["warn", { args: "none", ignoreRestSiblings: true }],
-      "no-empty": "off"
-    }
+    rules: { "no-unused-vars": ["warn", { args: "none" }], "no-empty": "off" }
   },
   {
     files: ["formValidation.js", "public/**/*.js"],
-    languageOptions: {
-      ecmaVersion: 2021,
-      sourceType: "script",
-      globals: { ...globals.browser }
-    }
+    languageOptions: { ecmaVersion: 2021, sourceType: "script", globals: { ...globals.browser } }
   }
 ];

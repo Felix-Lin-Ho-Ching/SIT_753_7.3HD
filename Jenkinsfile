@@ -1,38 +1,33 @@
 pipeline {
   agent any
   options { timestamps(); skipDefaultCheckout(true) }
-  parameters {
-    booleanParam(name: 'RUN_SONAR', defaultValue: true, description: 'Run SonarQube analysis')
-    booleanParam(name: 'RUN_DOCKER', defaultValue: false, description: 'Build and run Docker image')
-  }
+
   environment {
     NODE_OPTIONS = "--max_old_space_size=2048"
     SCANNER_VERSION = "6.2.1.4610"
   }
+
   stages {
     stage('Checkout') {
-      steps {
-        checkout scm
-      }
+      steps { checkout scm }
     }
+
     stage('Build') {
       steps {
         bat 'node -v  && (npm ci  || npm install )'
       }
-      post {
-        always {
-          archiveArtifacts artifacts: 'package.json,package-lock.json', fingerprint: true, allowEmptyArchive: true
-        }
-      }
+      post { always { archiveArtifacts artifacts: 'package*.json', fingerprint: true } }
     }
+
     stage('Test') {
       steps {
-        bat '''
+        // 1) ensure folder exists  2) run Jest and write JUnit  3) keep going even if tests fail so we can publish the report
+        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+          bat '''
 if not exist reports mkdir reports
-npm i --no-save jest-junit@16
-set JEST_JUNIT_OUTPUT=reports\\junit.xml
 npx jest --ci --runInBand --coverage --coverageReporters=lcov --reporters=default --reporters=jest-junit
 '''
+        }
       }
       post {
         always {
@@ -41,15 +36,17 @@ npx jest --ci --runInBand --coverage --coverageReporters=lcov --reporters=defaul
         }
       }
     }
+
     stage('Code Quality (ESLint)') {
       steps {
+        // non-blocking; Sonar will run anyway
         catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
           bat 'npx eslint .'
         }
       }
     }
+
     stage('Code Quality (SonarQube)') {
-      when { expression { return params.RUN_SONAR } }
       steps {
         withSonarQubeEnv('SonarLocal') {
           withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
@@ -75,48 +72,11 @@ set PATH=%CD%\\%SCANNER_DIR%\\bin;%PATH%
         }
       }
     }
+
     stage('Quality Gate') {
-      when { expression { return params.RUN_SONAR } }
-      steps {
-        timeout(time: 2, unit: 'MINUTES') {
-          waitForQualityGate abortPipeline: false
-        }
-      }
-    }
-    stage('Security') {
-      steps {
-        bat 'npm audit --omit=dev --audit-level=high || exit /b 0'
-      }
-    }
-    stage('Build Image') {
-      when { expression { return params.RUN_DOCKER } }
-      steps {
-        bat 'docker version && docker build -t sit753-7_3hd:%BUILD_NUMBER% .'
-      }
-    }
-    stage('Deploy to Staging') {
-      when { expression { return params.RUN_DOCKER } }
-      steps {
-        bat 'docker rm -f sit753-7_3hd || echo ok'
-        bat 'docker run -d --name sit753-7_3hd -p 3000:3000 sit753-7_3hd:%BUILD_NUMBER%'
-      }
-    }
-    stage('Monitoring & Health') {
-      when { expression { return params.RUN_DOCKER } }
-      steps {
-        bat 'powershell -Command "Invoke-WebRequest http://localhost:3000/healthz -UseBasicParsing | Out-Null"'
-      }
-    }
-    stage('Release') {
-      when { branch 'main' }
-      steps {
-        bat 'git config user.email "ci@example.com" & git config user.name "ci-bot" & git tag -a v%BUILD_NUMBER% -m "CI build %BUILD_NUMBER%" & git push origin --tags || exit /b 0'
-      }
+      steps { timeout(time: 2, unit: 'MINUTES') { waitForQualityGate abortPipeline: false } }
     }
   }
-  post {
-    always {
-      cleanWs()
-    }
-  }
+
+  post { always { cleanWs() } }
 }

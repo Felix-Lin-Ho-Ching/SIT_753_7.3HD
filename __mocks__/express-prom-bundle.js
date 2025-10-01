@@ -1,3 +1,3 @@
 module.exports = function () {
-    return function (req, res, next) { next(); };
+    return function (_req, _res, next) { next(); };
 };
