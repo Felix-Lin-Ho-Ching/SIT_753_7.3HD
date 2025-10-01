@@ -5,7 +5,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        echo 'JF_MARKER: r6'
+        echo 'JF_MARKER: r7'
         checkout scm
       }
     }
@@ -19,27 +19,27 @@ pipeline {
 
     stage('Test') {
       steps {
-        bat 'if not exist reports mkdir reports'
-        bat 'npm i --no-save jest-junit@16'
-        bat 'set JEST_JUNIT_OUTPUT=reports\\junit.xml && npx jest --ci --runInBand --coverage --coverageReporters=lcov --reporters=default --reporters=jest-junit'
-        bat 'echo ===== DIR REPORTS ===== & dir reports'
-        junit testResults: '**/reports/*.xml', keepLongStdio: true
+        // Ensure reports dir exists and the reporter module is present (safe even if already installed)
+        bat '''
+          if not exist reports mkdir reports
+          npm i --no-save jest-junit@16
+          npx jest --ci --runInBand --coverage --coverageReporters=lcov
+          echo ===== DIR WORKSPACE ===== & dir
+          echo ===== DIR REPORTS ===== & dir reports
+        '''
+        // Pick up either the configured path or any junit*.xml as a fallback
+        junit testResults: '**/reports/junit.xml, **/junit*.xml', keepLongStdio: true
       }
     }
 
     stage('Code Quality (ESLint)') {
-      steps {
-        bat 'npm run lint  || exit /b 0'
-      }
+      steps { bat 'npm run lint  || exit /b 0' }
     }
 
+    // Leave Sonar disabled unless you've configured it in Jenkins
     stage('Code Quality (SonarQube)') {
-      when { expression { false } } // leave off unless you enable Sonar later
-      steps {
-        withSonarQubeEnv('SonarLocal') {
-          bat 'echo sonar disabled'
-        }
-      }
+      when { expression { false } }
+      steps { echo 'Sonar disabled in this pipeline for now.' }
     }
   }
 
