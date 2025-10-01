@@ -36,9 +36,29 @@ pipeline {
       }
     }
 
-    stage('Code Quality') {
-      steps { bat "npm run lint || exit /b 0" }
+stage('Code Quality (ESLint)') {
+  steps { bat "npm run lint || exit /b 0" }
+}
+
+stage('Code Quality (SonarQube)') {
+  steps {
+    withSonarQubeEnv('SonarLocal') {
+      bat """
+        npx jest --coverage --coverageReporters=lcov --coverageReporters=text-summary
+        "%SONAR_SCANNER_HOME%\\bin\\sonar-scanner.bat"
+      """
     }
+  }
+}
+
+stage('Quality Gate') {
+  steps {
+    timeout(time: 2, unit: 'MINUTES') {
+      waitForQualityGate abortPipeline: false
+    }
+  }
+}
+
 
     stage('Security') {
       steps {
@@ -65,19 +85,22 @@ pipeline {
       }
     }
 
-    stage('Release') {
-      when {
-        expression { return env.BRANCH_NAME == 'main' }
-      }
-      steps {
-        bat """
-          git config user.email "ci@example.com"
-          git config user.name "ci-bot"
-          git tag -a v%BUILD_NUMBER% -m "CI build %BUILD_NUMBER%"
-          git push origin --tags
-        """
-      }
-    }
+stage('Release') {
+  steps {
+    bat '''
+      for /f %%b in ('git rev-parse --abbrev-ref HEAD') do set BR=%%b
+      echo Current branch: %BR%
+      if /I "%BR%"=="main" (
+        git config user.email "ci@example.com"
+        git config user.name "ci-bot"
+        git tag -a v%BUILD_NUMBER% -m "CI build %BUILD_NUMBER%"
+        git push origin --tags || echo "Tag push failed (no creds?) - continuing"
+      ) else (
+        echo Skipping tag: not on main (branch=%BR%)
+      )
+    '''
+  }
+}
 
     stage('Monitoring & Health') {
       steps {
