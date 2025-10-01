@@ -1,7 +1,6 @@
 pipeline {
   agent any
   options { timestamps(); skipDefaultCheckout(false) }
-
   environment { CI = 'true' }
 
   stages {
@@ -22,12 +21,13 @@ pipeline {
     stage('Test') {
       steps {
         bat '''
+          if not exist reports mkdir reports
           npm i --no-save jest-junit@16
-          set JEST_JUNIT_OUTPUT=junit.xml
+          set JEST_JUNIT_OUTPUT=reports\\junit.xml
           npx jest --runInBand --coverage --coverageReporters=lcov --coverageReporters=text-summary --reporters=default --reporters=jest-junit
         '''
-        junit 'junit.xml'
-        archiveArtifacts artifacts: 'coverage/**, junit.xml', fingerprint: true, allowEmptyArchive: false
+        junit 'reports/junit.xml'
+        archiveArtifacts artifacts: 'coverage/**, reports/junit.xml', fingerprint: true
       }
     }
 
@@ -93,13 +93,9 @@ pipeline {
     }
 
     stage('Monitoring & Health') {
-      steps {
-        bat 'curl.exe http://localhost:3000/healthz || exit /b 0'
-      }
+      steps { bat 'curl.exe http://localhost:3000/healthz || exit /b 0' }
     }
   }
 
-  post {
-    always { cleanWs() }
-  }
+  post { always { cleanWs() } }
 }
